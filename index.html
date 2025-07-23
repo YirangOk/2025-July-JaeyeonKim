@@ -5,14 +5,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Secret Letter</title>
-    <!-- Google Fonts: Noto Sans KR (CJK) Bold -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* --- Base Reset & Typography --- */
         * {
             box-sizing: border-box;
             margin: 0;
-            padding: 0;
+            padding: 0
         }
 
         body {
@@ -20,87 +18,143 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: #ffffff;
+            color: #252524;
+            background: #db6e3a;
             font-family: "Noto Sans KR", "Helvetica Neue", Arial, sans-serif;
             padding: 1rem;
-            position: relative;
-            /* allow fixed background canvas stacking */
+            position: relative
         }
 
-        /* --- Letter Container --- */
         .letter-wrapper {
             position: relative;
-            /* for overlay canvas positioning */
             background: #fffaf0;
-            /* ivory letter paper */
-            /* border & shadow removed per request */
             max-height: 80vh;
-            /* enable internal scroll */
             overflow-y: auto;
-            border: none;
+            /* border: 2px solid #e0dcd5; */
             box-shadow: none;
             padding: 2.5rem 2rem;
             max-width: 680px;
             width: 100%;
             line-height: 1.75;
-            /* 1.75 line spacing */
             letter-spacing: -0.05em;
-            /* approx -10 tracking */
-            color: #333;
-            z-index: 1;
-            /* above background canvas */
+            color: #555;
+            z-index: 1
         }
 
-        /* Background bouncing text canvas */
         #bgCanvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            /* allow clicks through */
+            z-index: 500;
+            pointer-events: none
         }
 
-        /* --- Miffy image bounce --- */
         #miffy {
             position: fixed;
             top: 0;
             left: 0;
-            width: 80px;
-            height: auto;
-            z-index: 0;
-            pointer-events: none;
-            /* click-through */
+            width: 100px !important;
+            height: 100px !important;
+            z-index: 3;
+            pointer-events: auto;
+            cursor: pointer
+        }
+
+        .speech-bubble {
+            position: fixed;
+            background: #fff;
+            border: 2px solid #252524;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 14px;
+            color: #252524;
+            white-space: nowrap;
+            z-index: 4;
+        }
+
+        .speech-bubble::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #252524;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 1.5rem;
-            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-size: clamp(1.5rem, 4vw, 2rem)
         }
 
-        /* Paragraph styling inside letter */
         .letter-wrapper p {
             margin-bottom: 1rem;
             font-size: clamp(1rem, 2.5vw, 1.125rem);
             text-align: justify;
-            text-indent: 3rem;
-            /* 3rem indent */
+            text-indent: 3rem
         }
 
-        /* Highlight color when selecting text */
         ::selection {
-            background: #ffff00;
-            /* fluorescent yellow */
-            color: inherit;
+            color: inherit
         }
 
-        /* Responsive tweaks */
-        @media (max-width: 480px) {
+        #photoStrip {
+            position: fixed;
+            left: 10px;
+            bottom: 10px;
+            width: 220px;
+            height: 280px;
+            z-index: 4
+        }
+
+        #photoStrip img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 250px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            transition: transform .2s
+        }
+
+        #photoStrip img:nth-child(1) {
+            transform: rotate(-6deg) translate(-8px, -8px)
+        }
+
+        #photoStrip img:nth-child(2) {
+            transform: rotate(-3deg) translate(-4px, -4px)
+        }
+
+        #photoStrip img:nth-child(3) {
+            transform: rotate(0deg)
+        }
+
+        #photoStrip img:nth-child(4) {
+            transform: rotate(3deg) translate(4px, 4px)
+        }
+
+        #photoStrip img:nth-child(5) {
+            transform: rotate(6deg) translate(8px, 8px)
+        }
+
+        #photoStrip img:nth-child(6) {
+            transform: rotate(9deg) translate(12px, 12px)
+        }
+
+        #photoStrip img:nth-child(7) {
+            transform: rotate(12deg) translate(16px, 16px)
+        }
+
+        @media(max-width:480px) {
             .letter-wrapper {
-                padding: 1.75rem 1.25rem;
+                padding: 1.75rem 1.25rem
             }
         }
     </style>
@@ -108,7 +162,7 @@
 
 <body>
     <canvas id="bgCanvas"></canvas>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 248.75 418.1">
+    <svg id="miffy" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 248.75 418.1">
         <defs>
             <style>
                 .cls-1 {
@@ -177,223 +231,218 @@
             옥이랑 드림
         </p>
     </div>
-
-    <!-- Overlay canvas (added via JS) will sit inside .letter-wrapper -->
-
+    <div id="photoStrip"><img src="img_1.png" alt="photo 1" /><img src="img_2.png" alt="photo 2" /><img src="img_3.png"
+            alt="photo 3" /><img src="img_4.png" alt="photo 4" /><img src="img_5.png" alt="photo 5" /><img
+            src="img_6.png" alt="photo 6" /><img src="img_7.png" alt="photo 7" /></div>
     <script>
-        /**
-         * Scratch-off (erase-to-reveal) implementation
-         * -------------------------------------------------
-         * We create a canvas the size of the letter wrapper.
-         * The canvas is filled with a solid color matching the page background.
-         * Pointer movements erase portions of the canvas (make them transparent)
-         * to reveal the hidden text underneath.
-         */
-
         (function () {
-            const wrapper = document.getElementById("letterWrapper");
-            let canvas, ctx, isPointerDown = false;
-            const eraseRadius = 24; // radius of eraser circle in px
+            const w = document.getElementById("letterWrapper");
+            let c, x, d = false;
+            const r = 24;
 
-            function createCanvas() {
-                // Remove existing canvas if any (for resize)
-                if (canvas) canvas.remove();
-
-                const width = wrapper.scrollWidth;
-                const height = wrapper.scrollHeight;
-                canvas = document.createElement("canvas");
-                canvas.width = width * window.devicePixelRatio;
-                canvas.height = height * window.devicePixelRatio;
-                canvas.style.width = width + "px";
-                canvas.style.height = height + "px";
-                canvas.style.position = "absolute";
-                canvas.style.top = 0;
-                canvas.style.left = 0;
-                canvas.style.cursor = "crosshair";
-                canvas.style.zIndex = 2;
-
-                wrapper.appendChild(canvas);
-                ctx = canvas.getContext("2d");
-                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-                // Fill overlay with background color
-                ctx.fillStyle = getComputedStyle(document.body).backgroundColor || "#faf8f5";
-                ctx.fillRect(0, 0, width, height);
+            function m() {
+                if (c) c.remove();
+                const a = w.scrollWidth,
+                    b = w.scrollHeight;
+                c = document.createElement("canvas");
+                c.width = a * window.devicePixelRatio;
+                c.height = b * window.devicePixelRatio;
+                c.style.width = a + "px";
+                c.style.height = b + "px";
+                c.style.position = "absolute";
+                c.style.top = 0;
+                c.style.left = 0;
+                c.style.cursor = "crosshair";
+                c.style.zIndex = 2;
+                w.appendChild(c);
+                x = c.getContext("2d");
+                x.scale(window.devicePixelRatio, window.devicePixelRatio);
+                x.fillStyle = getComputedStyle(document.body).backgroundColor || "#faf8f5";
+                x.fillRect(0, 0, a, b)
             }
 
-            function getPointerPos(evt) {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-                const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+            function g(e) {
+                const t = c.getBoundingClientRect();
+                const i = e.touches ? e.touches[0].clientX : e.clientX,
+                    l = e.touches ? e.touches[0].clientY : e.clientY;
                 return {
-                    x: (clientX - rect.left),
-                    y: (clientY - rect.top)
-                };
+                    x: i - t.left,
+                    y: l - t.top
+                }
             }
 
-            function erase(pos) {
-                ctx.globalCompositeOperation = "destination-out";
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y, eraseRadius, 0, Math.PI * 2);
-                ctx.fill();
+            function h(e) {
+                x.globalCompositeOperation = "destination-out";
+                x.beginPath();
+                x.arc(e.x, e.y, r, 0, Math.PI * 2);
+                x.fill()
             }
 
-            function handlePointerDown(evt) {
-                isPointerDown = true;
-                erase(getPointerPos(evt));
+            function p(e) {
+                d = true;
+                h(g(e))
             }
 
-            function handlePointerMove(evt) {
-                if (!isPointerDown) return;
-                evt.preventDefault(); // prevent page scrolling on touch
-                erase(getPointerPos(evt));
+            function v(e) {
+                if (!d) return;
+                e.preventDefault();
+                h(g(e))
             }
 
-            function handlePointerUp() {
-                isPointerDown = false;
+            function u() {
+                d = false
             }
 
-            function addEventListeners() {
-                // Mouse
-                canvas.addEventListener("mousedown", handlePointerDown);
-                canvas.addEventListener("mousemove", handlePointerMove);
-                document.addEventListener("mouseup", handlePointerUp);
-                // Touch
-                canvas.addEventListener("touchstart", handlePointerDown, {
+            function s() {
+                c.addEventListener("mousedown", p);
+                c.addEventListener("mousemove", v);
+                document.addEventListener("mouseup", u);
+                c.addEventListener("touchstart", p, {
                     passive: false
                 });
-                canvas.addEventListener("touchmove", handlePointerMove, {
+                c.addEventListener("touchmove", v, {
                     passive: false
                 });
-                document.addEventListener("touchend", handlePointerUp);
+                document.addEventListener("touchend", u)
             }
-
-            // Initialize
-            createCanvas();
-            addEventListeners();
-
-            // Resize handling
+            m();
+            s();
             window.addEventListener("resize", () => {
-                createCanvas();
+                m()
             });
-
-            /* ---------- Background bouncing text animation ---------- */
             (function () {
-                const bgCanvas = document.getElementById("bgCanvas");
-                const ctxBg = bgCanvas.getContext("2d");
-                const phrases = [
-                    "김재연 귀하에게 도착한 비밀 편지",
-                    "어떤 질서의 미안함을 담아.",
-                    "항상 응원하는 마음을 보내며,",
-                    "그나저나 살이 너무 빠져서 걱정되요. 건강에 이상 없기를",
-                    "멋진 사람 많이 만나면 소개좀 해주세요.",
-                    "미피 너무 귀엽지 않나요? 남자라는거 이번에 알았어요. 애한테 성별이 있어요?!",
-                    "거기에 앞으로 재연의 비밀 무기 넣고 다니세요.",
-                    "참고로 저도 비슷한 박스가 있는데 제 비밀 무기는...",
-                    "아 이거 알려주면 안돼는뎁.",
-                    "제 비밀 무기는... 귀침입니다.",
-                    "가끔 집중안되거나 마음을 다스릴때 붙이면 묘하게 도움되요.",
-                    "메시지 보내는거 재밌다.",
-                    "그거 알아요? 재연이랑 함께하는 사람들이 너무 부러워요!",
-                    "그럼, 다음에 또 만나요!",
-                    "네덜란드에서도 재연 뭐하는지 지켜볼게욧!"
-                ];
-                let phraseIndex = 0;
-                let phrase = phrases[phraseIndex];
+                const y = document.getElementById("bgCanvas"),
+                    z = y.getContext("2d"),
+                    A = ["이거 모바일 안돼염", "김재연 귀하에게 도착한 비밀 편지", "어떤 질서의 미안함을 담아.", "항상 응원하는 마음을 보내며,",
+                        "그나저나 살이 너무 빠져서 걱정되요. 건강에 이상 없기를", "멋진 사람 많이 만나면 소개좀 해주세요.",
+                        "미피 너무 귀엽지 않나요? 남자라는거 이번에 알았어요. 애한테 성별이 있어요?!", "거기에 앞으로 재연의 비밀 무기 넣고 다니세요.",
+                        "참고로 저도 비슷한 박스가 있는데 제 비밀 무기는...", "아 이거 알려주면 안돼는뎁.", "제 비밀 무기는... 귀침입니다.",
+                        "가끔 집중안되거나 마음을 다스릴때 붙이면 묘하게 도움되요.", "메시지 보내는거 재밌다.", "그거 알아요? 재연이랑 함께하는 사람들이 너무 부러워요!",
+                        "그럼, 다음에 또 만나요!", "네덜란드에서도 재연 뭐하는지 지켜볼게욧!"
+                    ],
+                    B = () => Math.random() * 2.8 + 1.8;
+                let o = 0,
+                    f = A[o],
+                    P = {
+                        x: 50,
+                        y: 50
+                    },
+                    V = {
+                        x: B(),
+                        y: B()
+                    },
+                    E, F;
 
-                let pos = {
-                    x: 50,
-                    y: 50
-                };
-                let vel = {
-                    x: 2.8,
-                    y: 2.2
-                };
-                let textWidth, textHeight;
-
-                function resizeBg() {
-                    bgCanvas.width = window.innerWidth * window.devicePixelRatio;
-                    bgCanvas.height = window.innerHeight * window.devicePixelRatio;
-                    bgCanvas.style.width = window.innerWidth + "px";
-                    bgCanvas.style.height = window.innerHeight + "px";
-                    ctxBg.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-                    ctxBg.font = "20px Arial";
-                    textWidth = ctxBg.measureText(phrase).width;
-                    textHeight = 24; // approximate height
+                function R() {
+                    y.width = window.innerWidth * window.devicePixelRatio;
+                    y.height = window.innerHeight * window.devicePixelRatio;
+                    y.style.width = window.innerWidth + "px";
+                    y.style.height = window.innerHeight + "px";
+                    z.scale(window.devicePixelRatio, window.devicePixelRatio);
+                    z.font = "20px Arial";
+                    E = z.measureText(f).width;
+                    F = 24
                 }
 
-                function animate() {
-                    ctxBg.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-
-                    // Draw text
-                    ctxBg.fillStyle = "rgba(0,0,0,0.07)";
-                    ctxBg.fillText(phrase, pos.x, pos.y);
-
-                    // Move
-                    pos.x += vel.x;
-                    pos.y += vel.y;
-
-                    // Bounce
-                    if (pos.x + textWidth >= window.innerWidth || pos.x <= 0) vel.x *= -1;
-                    if (pos.y >= window.innerHeight || pos.y - textHeight <= 0) vel.y *= -1;
-
-                    requestAnimationFrame(animate);
+                function C() {
+                    z.clearRect(0, 0, y.width, y.height);
+                    z.fillStyle = "rgba(0,0,0,0.)";
+                    z.fillText(f, P.x, P.y);
+                    P.x += V.x;
+                    P.y += V.y;
+                    if (P.x + E >= window.innerWidth || P.x <= 0) V.x *= -1;
+                    if (P.y >= window.innerHeight || P.y - F <= 0) V.y *= -1;
+                    requestAnimationFrame(C)
                 }
-
-                resizeBg();
-                animate();
-
-                // Rotate phrase every 6 seconds
+                R();
+                C();
                 setInterval(() => {
-                    phraseIndex = (phraseIndex + 1) % phrases.length;
-                    phrase = phrases[phraseIndex];
-                    // Recalculate width for new phrase
-                    textWidth = ctxBg.measureText(phrase).width;
-                }, 6000);
-
-                window.addEventListener("resize", resizeBg);
+                    o = (o + 1) % A.length;
+                    f = A[o];
+                    E = z.measureText(f).width
+                }, 10000);
+                window.addEventListener("resize", R)
             })();
-
-            /* ---------- Miffy bouncing image ---------- */
             (function () {
-                const miffy = document.getElementById("miffy");
-                // If image fails to load, bail out
-                if (!miffy) return;
+                const q = document.getElementById("miffy");
+                if (!q) return;
+                const phrases = [
+                    "나 누를 줄 알았다.",
+                    "이랑 아이디어 떨어졌음",
+                    "아... 그만 눌러",
+                    "이익",
+                    "이거 재연 네오시티 말풍선 참고함 ㅋㅋ",
+                    "이거 언제 끝나지?",
+                    "지금 뭐 하는 거야?",
+                    "클릭하면 뭐가 나오나?",
+                    "비밀은 없다!",
+                    "내가 그렇게 귀여워?",
+                    "제발 일해라…",
+                    "너무 열심히 누르네?",
+                    "또 누를 거야?",
+                    "깜짝이야!",
+                    "휴... 터치 그만!"
+                ];
 
-                // Wait until image dimensions are available
-                function init() {
-                    const imgWidth = miffy.offsetWidth;
-                    const imgHeight = miffy.offsetHeight;
-                    if (imgWidth === 0 || imgHeight === 0) {
-                        requestAnimationFrame(init);
-                        return;
-                    }
-
-                    let pos = {
-                        x: 120,
-                        y: 120
-                    };
-                    let vel = {
-                        x: 2.4,
-                        y: 2.0
-                    };
-
-                    function animate() {
-                        pos.x += vel.x;
-                        pos.y += vel.y;
-
-                        if (pos.x + imgWidth >= window.innerWidth || pos.x <= 0) vel.x *= -1;
-                        if (pos.y + imgHeight >= window.innerHeight || pos.y <= 0) vel.y *= -1;
-
-                        miffy.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
-                        requestAnimationFrame(animate);
-                    }
-
-                    animate();
+                function showBubble() {
+                    const rect = q.getBoundingClientRect();
+                    const msg = phrases[Math.floor(Math.random() * phrases.length)];
+                    const b = document.createElement("div");
+                    b.className = "speech-bubble";
+                    b.textContent = msg;
+                    document.body.appendChild(b);
+                    const bw = b.offsetWidth;
+                    const bh = b.offsetHeight;
+                    b.style.left = Math.max(10, Math.min(window.innerWidth - bw - 10, rect.left + rect.width /
+                        2 - bw / 2)) + "px";
+                    b.style.top = Math.max(10, rect.top - bh - 16) + "px";
+                    setTimeout(() => b.remove(), 2500);
                 }
+                q.addEventListener("click", showBubble);
+                const J = () => {
+                    const a = q.offsetWidth || 50,
+                        b = q.offsetHeight || 50;
+                    let e = {
+                        x: Math.random() * (window.innerWidth - a),
+                        y: window.innerHeight - b - 20
+                    };
+                    const t = 2.4;
+                    let i = {
+                        x: (Math.random() > .5 ? 1 : -1) * t,
+                        y: -t
+                    };
 
-                init();
+                    function l() {
+                        e.x += i.x;
+                        e.y += i.y;
+                        if (e.x + a >= window.innerWidth || e.x <= 0) i.x *= -1;
+                        if (e.y + b >= window.innerHeight || e.y <= 0) i.y *= -1;
+                        q.style.transform = `translate(${e.x}px,${e.y}px)`;
+                        requestAnimationFrame(l)
+                    }
+                    l()
+                };
+                J()
+            })();
+            (function () {
+                const e = document.getElementById("photoStrip");
+                if (!e) return;
+                const t = Array.from(e.querySelectorAll("img")),
+                    i = Array.from({
+                        length: 10
+                    }, (_, n) => `img_${n+1}.png`);
+                let l = 0;
+
+                function a() {
+                    t.forEach((s, r) => {
+                        s.src = i[(l + r) % i.length]
+                    })
+                }
+                e.addEventListener("click", () => {
+                    l = (l + 1) % i.length;
+                    a()
+                });
+                a()
             })();
         })();
     </script>
